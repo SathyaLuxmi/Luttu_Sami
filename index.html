@@ -1,79 +1,759 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>For You ❤️</title>
-<style>
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(to right, #ff758c, #ff7eb3);
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For You ❤️</title>
 
-  .box {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  }
+  <style>
+    :root{
+      --bg1:#fff0f4;
+      --bg2:#ffe5ec;
+      --ink:#4a1f2b;
+      --muted:#8b4d5b;
+      --accent:#e3346e;
+      --accent-2:#ff6b9a;
+      --card:#ffffff;
+      --shadow: 0 18px 40px rgba(227,52,110,.18);
+      --transition: 500ms cubic-bezier(.2,.8,.2,1);
+      --ring: 0 0 0 4px rgba(227,52,110,.18);
+      --heart-size: 16px;
+    }
 
-  h1 {
-    color: #ff4d6d;
-    margin-bottom: 20px;
-  }
+    *{ box-sizing:border-box }
+    html,body{
+      height:100%; margin:0; color:var(--ink);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 800px at 20% -10%, #fff 0%, var(--bg1) 40%, var(--bg2) 100%),
+        linear-gradient(180deg, #fff 0%, var(--bg1) 30%, var(--bg2) 100%);
+      overflow-x:hidden;
+    }
 
-  button {
-    padding: 12px 25px;
-    font-size: 16px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    margin: 10px;
-  }
+    /* Floating hearts & sparkles (ACTIVE on all screens including cover) */
+    .hearts{
+      position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0;
+    }
+    .heart{
+      position:absolute; width:var(--heart-size); height:var(--heart-size);
+      transform:rotate(45deg); background:var(--accent-2);
+      animation: floatUp linear infinite; filter: drop-shadow(0 6px 10px rgba(227,52,110,.25));
+      opacity:.6;
+    }
+    .heart::before,.heart::after{
+      content:""; position:absolute; width:var(--heart-size); height:var(--heart-size);
+      border-radius:50%; background:inherit;
+    }
+    .heart::before{ left: calc(var(--heart-size) / -2); }
+    .heart::after{ top: calc(var(--heart-size) / -2); }
+    @keyframes floatUp {
+      0% { transform: translateY(20vh) rotate(45deg) scale(.8); opacity:.0; }
+      8% { opacity:.55; }
+      100% { transform: translateY(-120vh) rotate(45deg) scale(1.15); opacity:.1; }
+    }
+    .sparkle{
+      position:absolute; width:3px; height:3px; background:#fff;
+      border-radius:50%; box-shadow:0 0 8px #fff, 0 0 16px #ffd6e5;
+      opacity:.85; animation: twinkle 2.6s ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%,100%{ transform:scale(.6); opacity:.4; }
+      50%{ transform:scale(1.4); opacity:1; }
+    }
 
-  #yes {
-    background-color: #28a745;
-    color: white;
-  }
+    /* Screens */
+    .screen{
+      position:fixed; inset:0; display:grid; place-items:center; padding:24px;
+      transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+      z-index:1;
+    }
+    .screen.hidden{ opacity:0; transform: translateY(12px); visibility:hidden; pointer-events:none; }
 
-  #no {
-    background-color: #dc3545;
-    color: white;
-    position: absolute;
-  }
-</style>
+    /* ===== COVER: white card, pink ambient bg, envelope WITH heart ===== */
+    .cover-clean{
+      background: linear-gradient(180deg, #ffe6ef 0%, #ffd7e8 100%) !important; /* Pink outer bg */
+      display: grid; place-items: center;
+    }
+    
+ .card{
+      width:min(820px, 92vw);
+      background:var(--card);
+      border-radius:22px;
+      box-shadow: var(--shadow);
+      padding: clamp(22px, 4vw, 40px);
+      position:relative;
+      z-index:2;
+      border:1px solid #ffd3e1;
+    }
+
+    .title{
+      font-family: "Playfair Display", Georgia, serif;
+      font-weight:700;
+      font-size: clamp(30px, 6.2vw, 52px);
+      margin: 6px 0 16px;
+      text-align:center;
+      color:#b0154a;
+      letter-spacing:.4px;
+    }
+    .envelope-wrap{
+      margin: 14px auto 6px;
+      width: min(420px, 78vw);
+      aspect-ratio: 4/3;
+      display:grid; place-items:center;
+      cursor:pointer;
+      transition: transform .25s ease, filter .25s ease;
+      filter: drop-shadow(0 16px 24px rgba(176,21,74,.18));
+      border-radius:16px;
+      outline: none;
+    }
+    .envelope-wrap:focus-visible{ box-shadow: var(--ring); }
+    .envelope-wrap:hover{ transform: translateY(-3px) scale(1.02); }
+
+    .stamp{
+      position:absolute; top:-14px; right:-14px;
+      background: #ffedf3; border:2px dashed #ffa1bf; border-radius:18px; padding:8px 12px;
+      color:#b0154a; font-weight:700; transform: rotate(8deg);
+      box-shadow: 0 8px 18px rgba(227,52,110,.15);
+    }
+
+    /* ===== LETTER PAGES ===== */
+    .card{
+      width:min(820px, 92vw);
+      background:var(--card);
+      border-radius:22px;
+      box-shadow: var(--shadow);
+      padding: clamp(22px, 4vw, 40px);
+      position:relative;
+      border:1px solid #ffd3e1;
+    }
+    .letter{
+      display:grid; gap:18px; line-height:1.7;
+      background: radial-gradient(900px 500px at 120% -10%, #ffe9f1 0%, #fff 60%, #fff 100%);
+      min-height: 240px;
+    }
+    .divider{
+      height:1px; background: linear-gradient(90deg, #0000, #ffc0d4, #0000);
+      margin: 6px 0 6px;
+    }
+    .letter h2{
+      font-family:"Playfair Display", Georgia, serif;
+      margin:0 0 2px;
+      font-size: clamp(24px, 5vw, 36px);
+      text-align:center;
+      color:#b0154a;
+    }
+    .quote{
+      text-align:center;
+      color:#b0154a; font-weight:600; font-style:italic; font-size:clamp(14px, 3vw, 18px);
+      background: #fff4f8; padding:10px 14px; border-radius:12px; border:1px dashed #ffc8da;
+    }
+    .letter-body{ font-size: clamp(15px, 3.2vw, 18px); white-space: pre-wrap; }
+    .signature{ margin-top:8px; text-align:right; font-style:italic; color:#6a2b3a; }
+
+    /* Nav buttons */
+    .card-nav{ position:absolute; inset:0; pointer-events:none; z-index:3; }
+    .nav-btn{
+      position:absolute; top:50%; transform: translateY(-50%);
+      pointer-events:auto; background:#ffedf3; border:1px solid #ffc9dc; color:#b0154a;
+      border-radius:999px; width:42px; height:42px; display:grid; place-items:center;
+      box-shadow:0 8px 18px rgba(227,52,110,.15); cursor:pointer;
+      transition: transform .12s ease, background .2s, opacity .2s;
+    }
+    .nav-btn.left{ left:-18px; }
+    .nav-btn.right{ right:-18px; }
+    .nav-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+    @media (max-width:520px){
+      .nav-btn{ top:auto; bottom:12px; transform:none; width:48px; height:48px; }
+      .nav-btn.left{ left:12px; } .nav-btn.right{ right:12px; }
+    }
+
+    /* ===== PAGE 2: CTA (Yes/No) ===== */
+    .cta-wrap{
+      position: relative;
+      margin: 6px 0 2px;
+      padding: 16px;
+      border: 1px dashed #ffc8da;
+      border-radius: 14px;
+      background: #fff7fb;
+      min-height: 120px;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; flex-wrap: wrap;
+    }
+    .btn{
+      appearance:none; border:1px solid #ffc9dc; background:#ffedf3; color:#b0154a;
+      padding:10px 16px; border-radius:999px; font-weight:700; cursor:pointer;
+      box-shadow:0 8px 18px rgba(227,52,110,.15);
+    }
+    .btn-yes{ background:#ffe7f0; border-color:#ffb3cc; position:relative; z-index:2; }
+    .btn-no{ position:absolute; top:50%; left:58%; transform:translate(-50%,-50%); background:#fff; z-index:1; }
+    .yes-msg{
+      margin-top:8px; width:100%; text-align:center; color:#b0154a; font-weight:700;
+      background:#fff4f8; border:1px dashed #ffc8da; border-radius:12px; padding:10px 12px; display:none;
+    }
+
+    /* ===== PAGE 3: Flip Photo Card ===== */
+    .flip-card{ width:100%; max-width:360px; height:480px; perspective:1200px; margin:0 auto; }
+    .flip-card-inner{
+      position:relative; width:100%; height:100%;
+      transition: transform 0.9s cubic-bezier(.25,.8,.25,1);
+      transform-style: preserve-3d; cursor:pointer;
+    }
+    .flip-card-front, .flip-card-back{
+      position:absolute; width:100%; height:100%; backface-visibility:hidden;
+      background:#fff; border-radius:18px; box-shadow:0 12px 30px rgba(227,52,110,.18);
+      border:2px solid #ffd4e2;
+    }
+    .flip-back-design{
+      display:grid; place-items:center; font-weight:bold; color:#b0154a; font-size:20px;
+      background: repeating-linear-gradient(45deg, #fff7fc, #fff7fc 14px, #ffe2ef 14px, #ffe2ef 28px);
+    }
+    .flip-card-back{ transform:rotateY(180deg); display:grid; place-items:center; padding:12px; }
+    .flip-card-back img{ max-width:100%; border-radius:14px; border:3px solid #ffcade; }
+
+    .reveal-text{
+      margin-top:18px; text-align:center; color:#b0154a; background:#fff4f8;
+      border:1px dashed #ffbcd8; padding:12px 16px; border-radius:12px; font-weight:600;
+      opacity:0; transform:translateY(10px); transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal-text.show{ opacity:1; transform:translateY(0); }
+
+   .music-btn {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  font-size: 26px;
+  background: #fff0f6;
+  border: 2px solid #ffb3d1;
+  padding: 8px 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 9999;
+  box-shadow: 0 6px 14px rgba(227,52,110,.25);
+  transition: transform .2s ease, background .2s ease;
+}
+
+.music-btn:hover {
+  transform: scale(1.12);
+  background: #ffe1ee;
+}
+
+.music-btn.off {
+  opacity: .6;
+}
+
+  </style>
 </head>
+
 <body>
 
-<div class="box">
-  <h1>Will you marry me? 💍❤️</h1>
-  <button id="yes" onclick="yesClick()">Yes</button>
+<div id="musicToggle" class="music-btn">
+  🔊
 </div>
 
-<button id="no">No</button>
+<audio id="bgMusic" loop>
+  <source src="song.mp3" type="audio/mpeg">
+</audio>
 
-<script>
-  const noBtn = document.getElementById("no");
+  <!-- Floating background hearts & sparkles -->
+  <div class="hearts" aria-hidden="true" id="heartsLayer"></div>
 
-  noBtn.addEventListener("mouseover", moveButton);
-  noBtn.addEventListener("click", moveButton);
+  <!-- Screen 1: Cover -->
+  <section id="cover" class="screen">
+    <div class="card cover" role="dialog" aria-labelledby="coverTitle">
+      <div class="stamp">Be Mine 💖</div>
+      <h1 id="coverTitle" class="title">A Letter for You</h1>
 
-  function moveButton() {
-    const x = Math.random() * (window.innerWidth - 100);
-    const y = Math.random() * (window.innerHeight - 50);
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
+      <!-- Click Area (Envelope SVG only) -->
+      <div class="envelope-wrap" id="openArea" tabindex="0" aria-label="Open letter">
+        <svg viewBox="0 0 600 450" width="100%" height="100%" aria-hidden="true">
+          <ellipse cx="300" cy="380" rx="180" ry="24" fill="rgba(176,21,74,.12)"></ellipse>
+          <rect x="70" y="90" width="460" height="280" rx="18" fill="#fff" stroke="#ffb3cc" stroke-width="3"/>
+          <rect x="95" y="110" width="410" height="240" rx="12" fill="#fff5f8" stroke="#ffd1e1" stroke-width="2"/>
+          <path d="M70 90 L300 240 L530 90 Z" fill="url(#flapGrad)" stroke="#ff89b0" stroke-width="3"/>
+          <g transform="translate(300,220) scale(1.2)">
+            <path d="M0 0
+                     m -18 0
+                     c 0 -12, 18 -18, 22 -4
+                     c 4 -14, 22 -8, 22 4
+                     c 0 12, -10 18, -22 28
+                     c -12 -10, -22 -16, -22 -28z"
+                  fill="#e3346e" stroke="#ffcadb" stroke-width="2"></path>
+          </g>
+          <defs>
+            <linearGradient id="flapGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#ffd1e1"/>
+              <stop offset="100%" stop-color="#fff"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== LETTER PAGES ===== -->
+  <section id="letter" class="screen hidden" aria-live="polite">
+    <article class="card letter" id="letterCard">
+      <div class="stamp">With Love ❤️</div>
+      <h2 id="letterTitle">My Dear Luttu,</h2>
+      <div class="divider"></div>
+      <p class="quote" id="letterQuote">“Let’s keep choosing each other, every day.”</p>
+
+      <div class="letter-body" id="letterText">
+It started at Hitachi, not knowing life was quietly planning us.
+Two strangers sharing stories, late-night chats, heartful laughter
+after long days, quiet road night walks that felt like home.
+
+Somewhere in those moments, I fell in love with you. Not suddenly, but slowly—
+with the way you stayed, and the way you made me feel.
+When I spoke my heart, fear stood in your eyes—
+not because you didn’t feel it, but because the world felt heavy.
+
+So I chose to stay, not as your girl, but as your friend,
+because loving you also meant understanding you.
+And then one day, you saw it too, what our hearts already knew—
+that we are meant for each other.
+
+Now we stand, hand in hand, ready for every test,
+not because the road is easy, but because together is best.
+And someday, when the world asks why, I’ll smile and simply say—
+we didn’t just fall in love, we chose it… every day.
+
+Love you Luttu..❤️.. till my last breath..❤️..</div>
+
+      <div class="signature" id="letterSign">Always yours,<br/>— ♥</div>
+
+      <!-- Nav buttons -->
+      <div class="card-nav" aria-hidden="false">
+        <button id="backBtn" class="nav-btn left" title="Previous page / Back to envelope" aria-label="Previous page">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" stroke="#b0154a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button id="nextBtn" class="nav-btn right" title="Next page" aria-label="Next page">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" stroke="#b0154a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </article>
+  </section>
+
+  <script>
+
+     document.getElementById("bgMusic").volume = 0.07;
+    /* Floating hearts & sparkles: ACTIVE immediately (cover + all pages) */
+    (function makeHearts(){
+      const layer = document.getElementById('heartsLayer');
+      const colors = ['#ff6b9a','#ff89b0','#e3346e','#ffa3c0'];
+      const count = 26;
+      for(let i=0;i<count;i++){
+        const h = document.createElement('div');
+        h.className='heart';
+        h.style.left = Math.random()*100+'vw';
+        h.style.bottom = (-Math.random()*30)+'vh';
+        h.style.background = colors[Math.floor(Math.random()*colors.length)];
+        h.style.animationDuration = (Math.random()*12 + 10).toFixed(2)+'s';
+        h.style.animationDelay = (Math.random()*-20).toFixed(2)+'s';
+        layer.appendChild(h);
+      }
+      for(let i=0;i<20;i++){
+        const s=document.createElement('div');
+        s.className='sparkle';
+        s.style.left = (Math.random()*100)+'vw';
+        s.style.top = (Math.random()*100)+'vh';
+        s.style.animationDelay = (Math.random()*2)+'s';
+        layer.appendChild(s);
+      }
+    })();
+
+    (function () {
+      const cover   = document.getElementById('cover');
+      const letter  = document.getElementById('letter');
+      const openArea= document.getElementById('openArea');
+      const backBtn = document.getElementById('backBtn');
+      const nextBtn = document.getElementById('nextBtn');
+
+      const titleEl = document.getElementById('letterTitle');
+      const quoteEl = document.getElementById('letterQuote');
+      const textEl  = document.getElementById('letterText');
+      const signEl  = document.getElementById('letterSign');
+
+      // Pages
+      const pages = [
+        {
+          title: 'My Dear Luttu,',
+          quote: '“Let’s keep choosing each other, every day.”',
+          text: `It's all started at Hitachi, not knowing life was quietly planning us.
+Two strangers sharing stories, late-night chats, heartful laughter
+after long days, quiet road night walks that felt like home.
+
+Somewhere in those moments, I fell in love with you. Not suddenly, but slowly—
+with the way you stayed, and the way you made me feel.
+When I spoke my heart, fear stood in your eyes—
+not because you didn’t feel it, but because the world felt heavy.
+
+So I chose to stay, not as your girl, but as your friend,
+because loving you also meant understanding you.
+And then one day, you saw it too, what our hearts already knew—
+that we are meant for each other.
+
+Now we stand, hand in hand, ready for every test,
+not because the road is easy, but because together is best.
+And someday, when the world asks why, I’ll smile and simply say—
+we didn’t just fall in love, we chose it… every day.
+
+Love you Luttu..❤️.. till my last breath..❤️..`,
+          sign: 'Always yours,<br/>— ♥'
+        },
+        {
+          title: '💍❤️',
+          quote: '“You’re my today and all of my tomorrows. Will You Be My Forever ?”',
+          text: ``,
+          sign: 'Forever,<br/>— ♥',
+          cta: true
+        },
+        {
+          title: 'Made With Love ❤️',
+          quote: '“Some memories are meant to stay close to the heart.”',
+          text: ``,
+          sign: 'With love,<br/>— ♥',
+          flipCard: true,
+          photoSrc: 'First.jpeg',  // Make sure this file is next to this HTML
+          revealText: 'Our first meet, nervous smiles, and a memory that stayed in heart forever ❤️'
+        },
+
+        /* ------------------------ NEW 5 CARDS BELOW ------------------------ */
+
+        {
+          title: 'Us, Always ❤️',
+          quote: '“Some pictures speak the language of the heart.”',
+          text: ``,
+          sign: 'With love,<br/>— ♥',
+          flipCard: true,
+          photoSrc: 'Second.jpeg',
+          revealText: 'I found love in these moments, because I found you here ❤️'
+        },
+        {
+          title: 'Just Love ❤️',
+          quote: '“A tiny moment with You, but it meant the world to me.”',
+          text: ``,
+          sign: 'With love,<br/>— ♥',
+          flipCard: true,
+          photoSrc: 'Third.jpeg',
+          revealText: 'Every smile here feels warmer, because it was with you ❤️'
+        },
+        {
+          title: 'Together forever ❤️',
+          quote: '“You make ordinary moments feel magical.”',
+          text: ``,
+          sign: 'With love,<br/>— ♥',
+          flipCard: true,
+          photoSrc: 'Fourth.jpeg',
+          revealText: 'I smiled more then I realized, just being with you ❤️'
+        },
+        {
+          title: 'Timeless Magic ❤️',
+          quote: '“You made time slow down, and my heart feel full.”',
+          text: ``,
+          sign: 'With love,<br/>— ♥',
+          flipCard: true,
+          photoSrc: 'Fifth.jpeg',
+          revealText: 'With you, even silence felt full, and life felt complete ❤️'
+        },
+        {
+          title: 'Love you Always ❤️',
+          quote: '“With you, even the simplest moments feel real.”',
+          text: ``,
+          sign: 'With love,<br/>— ♥',
+          flipCard: true,
+          photoSrc: 'Sixth.jpeg',
+          revealText: 'Thanks for coming into my life, and turning it into something magical. ❤️'
+        }
+      ];
+      let pageIndex = 0;
+
+      // Tiny heart burst
+      function burstHearts(x,y){
+        const layer = document.getElementById('heartsLayer');
+        const colors = ['#e3346e','#ff3f86','#ff6b9a','#ffa3c0'];
+        const size = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--heart-size')) || 16;
+        for(let i=0;i<12;i++){
+          const p = document.createElement('div');
+          p.className='heart';
+          p.style.width = size + 'px';
+          p.style.height = size + 'px';
+          p.style.left = (x - size/2) + 'px';
+          p.style.top = (y - size/2) + 'px';
+          p.style.position='fixed';
+          p.style.background = colors[i % colors.length];
+          p.style.animation = 'burst 900ms ease-out forwards';
+          p.style.opacity = 1;
+          const dx = (Math.random()*2-1)*160;
+          const dy = (Math.random()*-1)*160 - 40;
+          p.style.setProperty('--dx', dx+'px');
+          p.style.setProperty('--dy', dy+'px');
+          layer.appendChild(p);
+          setTimeout(()=>p.remove(), 900);
+        }
+      }
+      // Burst keyframes
+      const style = document.createElement('style');
+      style.textContent = `
+      @keyframes burst {
+        0% { transform: translate(0,0) rotate(45deg) scale(0.7); opacity:1; }
+        100% { transform: translate(var(--dx, 0px), var(--dy, 0px)) rotate(45deg) scale(1.1); opacity:0; }
+      }`;
+      document.head.appendChild(style);
+
+      // CTA (page 2)
+      function injectCTA() {
+        const old = document.getElementById('ctaWrap');
+        if (old) old.remove();
+
+        const wrap = document.createElement('div');
+        wrap.className = 'cta-wrap';
+        wrap.id = 'ctaWrap';
+
+        const yes = document.createElement('button');
+        yes.type = 'button';
+        yes.className = 'btn btn-yes';
+        yes.textContent = 'Yes 💖';
+
+        const no = document.createElement('button');
+        no.type = 'button';
+        no.className = 'btn btn-no';
+        no.textContent = 'No 🙈';
+
+        const msg = document.createElement('div');
+        msg.className = 'yes-msg';
+        msg.id = 'yesMsg';
+
+        wrap.appendChild(yes);
+        wrap.appendChild(no);
+        wrap.appendChild(msg);
+
+        // Insert CTA before signature
+        textEl.parentNode.insertBefore(wrap, signEl);
+
+        // Move "No" button away from pointer
+        function moveNoButton(avoidX, avoidY) {
+          const wRect = wrap.getBoundingClientRect();
+          const bRect = no.getBoundingClientRect();
+          const yesRect = yes.getBoundingClientRect();
+
+          const pad = 8;
+          const maxLeft = Math.max(pad, wRect.width - bRect.width - pad);
+          const maxTop  = Math.max(pad, wRect.height - bRect.height - pad);
+
+          for (let tries = 0; tries < 16; tries++) {
+            const nx = pad + Math.random() * maxLeft;
+            const ny = pad + Math.random() * maxTop;
+
+            no.style.left = nx + 'px';
+            no.style.top  = ny + 'px';
+            no.style.transform = 'translate(0,0)';
+
+            const nb = no.getBoundingClientRect();
+            const overlapYes = !(nb.right < yesRect.left || nb.left > yesRect.right || nb.bottom < yesRect.top || nb.top > yesRect.bottom);
+
+            let farFromPointer = true;
+            if (typeof avoidX === 'number' && typeof avoidY === 'number') {
+              const cx = nb.left + nb.width/2;
+              const cy = nb.top + nb.height/2;
+              const dx = cx - avoidX;
+              const dy = cy - avoidY;
+              const dist = Math.hypot(dx, dy);
+              farFromPointer = dist > 120;
+            }
+            if (!overlapYes && farFromPointer) break;
+          }
+        }
+
+        const threshold = 90;
+        function maybeRun(ev){
+          const pointerX = ev.clientX ?? (ev.touches && ev.touches[0]?.clientX);
+          const pointerY = ev.clientY ?? (ev.touches && ev.touches[0]?.clientY);
+          if (pointerX == null || pointerY == null) return;
+          const nb = no.getBoundingClientRect();
+          const cx = nb.left + nb.width/2;
+          const cy = nb.top + nb.height/2;
+          const dist = Math.hypot(pointerX - cx, pointerY - cy);
+          if (dist < threshold) moveNoButton(pointerX, pointerY);
+        }
+
+        moveNoButton();
+        wrap.addEventListener('pointermove', maybeRun, { passive: true });
+        no.addEventListener('pointerenter', maybeRun);
+        no.addEventListener('pointerdown', (e)=>{ e.preventDefault(); maybeRun(e); });
+        no.addEventListener('click', (e)=>{ e.preventDefault(); maybeRun(e); });
+        no.addEventListener('focus', (e)=>{ maybeRun(e); });
+        window.addEventListener('resize', () => moveNoButton(), { passive:true });
+
+        // YES click
+        yes.addEventListener('click', (e)=>{
+          const x = (e.clientX || (window.innerWidth/2));
+          const y = (e.clientY || (window.innerHeight/2));
+          burstHearts(x, y);
+
+          msg.style.display = 'none';
+          yes.disabled = true;
+          no.style.display = 'none';
+
+          titleEl.textContent = 'Yay! You said YES! 💍❤️';
+          quoteEl.textContent = '“Now and always, it’s you and me.”';
+        });
+      }
+
+      function removeCTA(){
+        const old = document.getElementById('ctaWrap');
+        if (old) old.remove();
+      }
+
+      // Flip photo (page 3 and others)
+      function injectFlipCard(p) {
+        const old = document.getElementById('flipWrap');
+        if (old) old.remove();
+        if (!p.flipCard) return;
+
+        const wrap = document.createElement('div');
+        wrap.id = 'flipWrap';
+        wrap.style.marginTop = '8px';
+        wrap.style.display = 'grid';
+        wrap.style.placeItems = 'center';
+
+        const flip = document.createElement('div');
+        flip.className = 'flip-card';
+
+        const inner = document.createElement('div');
+        inner.className = 'flip-card-inner';
+
+        const front = document.createElement('div');
+        front.className = 'flip-card-front flip-back-design';
+        front.textContent = 'Click to Reveal ❤️';
+
+        const back = document.createElement('div');
+        back.className = 'flip-card-back';
+
+        const img = document.createElement('img');
+        img.src = p.photoSrc;
+        img.alt = 'Photo';
+        back.appendChild(img);
+
+        inner.appendChild(front);
+        inner.appendChild(back);
+        flip.appendChild(inner);
+        wrap.appendChild(flip);
+
+        const reveal = document.createElement('div');
+        reveal.className = 'reveal-text';
+        reveal.textContent = p.revealText;
+        wrap.appendChild(reveal);
+
+        // Insert before signature
+        signEl.parentNode.insertBefore(wrap, signEl);
+
+        inner.addEventListener('click', (e) => {
+          inner.style.transform = 'rotateY(180deg)';
+          setTimeout(()=> reveal.classList.add('show'), 600);
+          const x = e.clientX || (window.innerWidth/2);
+          const y = e.clientY || (window.innerHeight/2);
+          burstHearts(x,y);
+        });
+      }
+
+      function renderPage(i){
+        const p = pages[i];
+        titleEl.textContent = p.title;
+        quoteEl.textContent = p.quote;
+        textEl.textContent  = p.text;
+        signEl.innerHTML    = p.sign;
+
+        // Cleanup / inject page-specific widgets
+        removeCTA();
+        injectFlipCard(p);
+        if (p.cta) injectCTA();
+
+        // Next button state
+        nextBtn.disabled = (i >= pages.length - 1);
+        nextBtn.style.opacity = nextBtn.disabled ? 0.5 : 1;
+      }
+
+      function openLetter(evt) {
+
+       document.getElementById("bgMusic").play();  // <-- starts musi
+        // Heart burst on opening
+        const x = (evt?.clientX || (window.innerWidth/2));
+        const y = (evt?.clientY || (window.innerHeight/2));
+        burstHearts(x,y);
+
+        pageIndex = 0;
+        renderPage(pageIndex);
+        cover.classList.add('hidden');
+        setTimeout(() => letter.classList.remove('hidden'), 70);
+      }
+
+      function goBackToEnvelope(){
+        letter.classList.add('hidden');
+        setTimeout(() => cover.classList.remove('hidden'), 70);
+      }
+
+      function prevPage(){
+        if (pageIndex > 0){
+          pageIndex--;
+          renderPage(pageIndex);
+        } else {
+          goBackToEnvelope();
+        }
+      }
+
+      function nextPage(){
+        if (pageIndex < pages.length - 1){
+          pageIndex++;
+          renderPage(pageIndex);
+        }
+      }
+
+      // Envelope open
+      openArea.addEventListener('click', openLetter);
+      openArea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault(); openLetter(e);
+        }
+      });
+
+      // Nav
+      backBtn.addEventListener('click', prevPage);
+      nextBtn.addEventListener('click', nextPage);
+
+      // Keyboard
+      document.addEventListener('keydown', (e) => {
+        if (letter.classList.contains('hidden')) return;
+        if (e.key === 'ArrowLeft')  prevPage();
+        if (e.key === 'ArrowRight') nextPage();
+      });
+    })();
+
+// MUSIC TOGGLE BUTTON
+const musicBtn = document.getElementById("musicToggle");
+const bgMusic = document.getElementById("bgMusic");
+let musicOn = true;
+
+musicBtn.addEventListener("click", () => {
+  if (musicOn) {
+    bgMusic.pause();
+    musicBtn.textContent = "🔈"; // muted icon
+    musicBtn.classList.add("off");
+  } else {
+    bgMusic.play();
+    musicBtn.textContent = "🔊"; // playing icon
+    musicBtn.classList.remove("off");
   }
+  musicOn = !musicOn;
+});
 
-  function yesClick() {
-    document.body.innerHTML = "<h1 style='color:white;'>Yayyyy! ❤️💍 I knew it 😘</h1>";
-  }
-</script>
-
+  </script>
 </body>
 </html>
