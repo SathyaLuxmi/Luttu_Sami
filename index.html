@@ -726,11 +726,13 @@ openArea.addEventListener("click", async (evt) => {
     openLetter(evt);
 });
 
-      openArea.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault(); openLetter(e);
-        }
-      });
+     openArea.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        await tryPlayAudio();
+        openLetter(e);
+    }
+});
 
       // Nav
       backBtn.addEventListener('click', prevPage);
@@ -783,6 +785,7 @@ musicBtn.addEventListener("click", async () => {
   </script>
 </body>
 </html>
+
 
 
 
