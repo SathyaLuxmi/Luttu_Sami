@@ -252,9 +252,12 @@
   🔊
 </div>
 
-<audio id="bgMusic" loop>
+<audio id="bgMusic" preload="auto" playsinline>
   <source src="song.mp3" type="audio/mpeg">
+  <!-- Optional: add a second format fallback if you have it -->
+  <!-- <source src="song.ogg" type="audio/ogg"> -->
 </audio>
+
 
   <!-- Floating background hearts & sparkles -->
   <div class="hearts" aria-hidden="true" id="heartsLayer"></div>
@@ -683,7 +686,7 @@ Love you Luttu..❤️.. till my last breath..❤️..`,
 
       function openLetter(evt) {
 
-       document.getElementById("bgMusic").play();  // <-- starts musi
+         tryPlayAudio();
         // Heart burst on opening
         const x = (evt?.clientX || (window.innerWidth/2));
         const y = (evt?.clientY || (window.innerHeight/2));
@@ -736,22 +739,49 @@ Love you Luttu..❤️.. till my last breath..❤️..`,
       });
     })();
 
-// MUSIC TOGGLE BUTTON
+// Grab elements
 const musicBtn = document.getElementById("musicToggle");
 const bgMusic = document.getElementById("bgMusic");
 let musicOn = true;
 
-musicBtn.addEventListener("click", () => {
+// Centralized helper: try to play and handle promise
+async function tryPlayAudio() {
+  try {
+    const playPromise = bgMusic.play();
+    if (playPromise && typeof playPromise.then === "function") {
+      await playPromise;
+    }
+    bgMusic.volume = 0.07;
+    musicBtn.textContent = "🔊";
+    musicBtn.classList.remove("off");
+    musicOn = true;
+  } catch (err) {
+    console.warn("Audio play blocked or failed:", err);
+    musicBtn.textContent = "🔈";
+    musicBtn.classList.add("off");
+    musicOn = false;
+  }
+}
+
+// Modify your openLetter() → call this inside it
+function openLetter(evt) {
+  // your existing envelope-opening code…
+
+  tryPlayAudio();  // <-- THIS makes sure music starts after click
+
+  // rest of your code...
+}
+
+// Toggle handler
+musicBtn.addEventListener("click", async () => {
   if (musicOn) {
     bgMusic.pause();
-    musicBtn.textContent = "🔈"; // muted icon
+    musicBtn.textContent = "🔈";
     musicBtn.classList.add("off");
+    musicOn = false;
   } else {
-    bgMusic.play();
-    musicBtn.textContent = "🔊"; // playing icon
-    musicBtn.classList.remove("off");
+    await tryPlayAudio();
   }
-  musicOn = !musicOn;
 });
 
   </script>
