@@ -719,8 +719,14 @@ Love you Luttu..❤️.. till my last breath..❤️..`,
         }
       }
 
+      
       // Envelope open
-      openArea.addEventListener('click', openLetter);
+     
+openArea.addEventListener("click", async (evt) => {
+    await tryPlayAudio();   // direct user gesture → audio allowed!
+    openLetter(evt);
+});
+
       openArea.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault(); openLetter(e);
@@ -778,4 +784,5 @@ musicBtn.addEventListener("click", async () => {
   </script>
 </body>
 </html>
+
 
