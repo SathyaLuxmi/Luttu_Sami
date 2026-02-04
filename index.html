@@ -763,15 +763,6 @@ async function tryPlayAudio() {
   }
 }
 
-// Modify your openLetter() → call this inside it
-function openLetter(evt) {
-  // your existing envelope-opening code…
-
-  tryPlayAudio();  // <-- THIS makes sure music starts after click
-
-  // rest of your code...
-}
-
 // Toggle handler
 musicBtn.addEventListener("click", async () => {
   if (musicOn) {
@@ -787,3 +778,4 @@ musicBtn.addEventListener("click", async () => {
   </script>
 </body>
 </html>
+
